@@ -1,0 +1,145 @@
+ &NEWRUN
+  Head='1pC 500fs laser pulse with space charge'
+  RUN=1
+  Loop=F, Nloop=1
+  Distribution='10000p_1pC.ini', Xoff=0.0, Yoff=0.0
+  TRACK_ALL=T, 
+  PHASE_SCAN=F, 
+  AUTO_PHASE=T,
+  check_ref_part=F
+  H_max=0.01  
+  H_min=0.001      
+ /
+ 
+ &OUTPUT
+  ZSTART=0.0, 
+  ZSTOP=14.75,
+  Zemit=1475 
+  Zphase=1
+  !Screen(1)=10.85   ! 10 cm before chicane
+  !Screen(2)=12.35   ! middle of chicane
+  !Screen(3)=13.80   ! 5 cm after chicane
+  !Screen(4)=3       ! in front of linac
+  !Screen(5)=0.5     ! exit of solenoid
+  !Screen(6)=0.155   ! exit of the gun
+  Lmagnetized=F
+  EmitS=F
+  PhaseS=T
+  TrackS=T
+  RefS=T
+  TcheckS=F
+  CathodeS=F
+  High_res=T
+  LandFS = T
+ /
+ 
+ &CHARGE
+  Loop=F
+  LSPCH=T
+  LSPCH3D=T
+  L2D_3D=T
+  z_trans=10.85
+  Nrad=10, 
+  Nlong_in=15   !old 10
+  Cell_var=2.0
+  min_grid=0   ! old 0.4D-6
+  Max_scale=0.05
+  Max_count=40  ! old 100
+  Lmirror=T   ! old F
+
+  ! new
+  N_min = 100
+ /
+ 
+ &CAVITY
+  Loop=F
+  LEFieLD=T
+  FILE_EFieLD(1)= 'CTF3_Ez_ASTRA.dat' 
+  Nue(1)=2.9985, 
+  MaxE(1)=-120, !-120.0
+  Phi(1)=-23, 
+  C_pos(1)=0.0
+
+  FILE_EFieLD(2) = 'TWS_PSI_Sband_ASTRA.dat',
+  Nue(2)=2.9985, 
+  MaxE(2)=10, 
+  Phi(2)=-30.57, 
+  C_pos(2)=3.15, 
+  C_Numb(2)=153
+ /
+
+ &SOLENOID
+  Loop=F
+  LBFieLD=T
+  FILE_BFieLD(1)='bfld_scand.dat', 
+  MaxB(1)= 0.145! old 0.151
+  S_pos(1)=0.31925, S_xoff(1)=0.0, S_yoff(1)=0.0 ! solenoid position refers to its center
+  S_higher_order(1)=T
+  S_smooth(1)=4
+ /
+ 
+ &QUADRUPOLE
+  Loop=F
+  Lquad=T
+  Q_length(1)=0.1, ! not ordered yet, for gun section 0.08m
+  Q_bore(1)=0.05, 
+  Q_K(1)=5.66 ! focusing strength in m^-2
+  Q_pos(1)=8.75 !8.9 !
+
+  Q_length(2)=0.1, 
+  Q_bore(2)=0.05, 
+  Q_K(2)=-10.78
+  Q_pos(2)=9.05 !9.2 !
+  
+  Q_length(3)=0.1, 
+  Q_bore(3)=0.05, 
+  Q_K(3)=5.66
+  Q_pos(3)=9.35 !9.5 !
+ /
+ 
+ &DIPOLE
+  Loop=F
+  LDipole=T
+  D1(1)=(0.555,0.0), 
+D2(1)=(-0.555,0.0), 
+D3(1)=(0.555,0.2), 
+D4(1)=(-0.555,0.2), 
+D_zoff(1)=10.95, 
+D_Type(1)=hor, 
+D_Gap(1,1)=0.045, 
+D_Gap(2,1)=0.045, 
+D_xrot(1)=0.00000, 
+D_strength(1)=-0.1023
+
+  D1(2)=(0.555,0.0), 
+D2(2)=(-0.555,0.0), 
+D3(2)=(0.555,0.2), 
+D4(2)=(-0.555,0.2), 
+D_zoff(2)=11.65, 
+D_Type(2)=hor, 
+D_Gap(1,2)=0.045, 
+D_Gap(2,2)=0.045, 
+D_xrot(2)=3.14159, 
+D_strength(2)=0.1023
+  D1(3)=(0.555,0.0), 
+D2(3)=(-0.555,0.0), 
+D3(3)=(0.555,0.2), 
+D4(3)=(-0.555,0.2), 
+D_zoff(3)=12.85, 
+D_Type(3)=hor, 
+D_Gap(1,3)=0.045, 
+D_Gap(2,3)=0.045, 
+D_xrot(3)=0.00000, 
+D_strength(3)=0.1023
+
+  D1(4)=(0.555,0.0), 
+D2(4)=(-0.555,0.0), 
+D3(4)=(0.555,0.2), 
+D4(4)=(-0.555,0.2), 
+D_zoff(4)=13.55, 
+D_Type(4)=hor, 
+D_Gap(1,4)=0.045, 
+D_Gap(2,4)=0.045, 
+D_xrot(4)=3.14159, 
+D_strength(4)=-0.1023
+ /
