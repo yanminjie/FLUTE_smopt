@@ -147,9 +147,8 @@ while i_iter <= N_batch
         end 
     end
         
-    
+    fprintf('Finished %2ith batch \n \n', i_iter)   
     i_iter = i_iter+1;  
-    fprintf('Finished %2ith batch \n \n', i_iter)
 end
 
 
@@ -194,7 +193,7 @@ end
 N_exp = size(X,1);
 y = nan(N_exp, 1);
 
-if b_parallel
+if b_parallel && N_exp > 1
     parfor i_exp = 1:N_exp
         timer = tic();
         y(i_exp) = feval(fun, X(i_exp, :));

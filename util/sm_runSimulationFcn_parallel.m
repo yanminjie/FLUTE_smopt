@@ -20,24 +20,28 @@ appearances = [1,1,1,2,2,1,2,3,1];
 output_para = {'RMSBunchLength'};
 THz_source = 'CSR';
 
-try
-    w=getCurrentWorker;
-    if isempty(w)
-        tempName = 'client';
-    else
-        tempName = num2str(w.ProcessId);
-    end
-catch
-    tempName = 'client';
-end
+% try
+%     w=getCurrentWorker;
+%     if isempty(w)
+%         tempName = 'client';
+%     else
+%         tempName = num2str(w.ProcessId);
+%     end
+% catch
+%     tempName = 'client';
+% end
+% projectName = tempname;
 
-newFolder = ['myfolder',tempName];
-TempFolder = fullfile(tempdir,newFolder);
+TempFolder = tempname;
+[tempDir,newFolder]=fileparts(TempFolder());
+projectName = num2str(randi(10^9-1,1));
 TempFolder = [TempFolder,'\'];
-mkdir(tempdir,newFolder);
-% disp(TempFolder)
 
-projectName = [datestr(now,'yyyymmddHHMMSS'), tempName];
+% newFolder = ['myfolder',projectName];
+% TempFolder = fullfile(tempdir,newFolder);
+% TempFolder = [TempFolder,'\'];
+mkdir(tempDir,newFolder);
+disp(TempFolder)
 
 astra_file_modified = [TempFolder,projectName,'.in'];
 out_dist_file = [TempFolder, projectName,'.1475.001'];

@@ -9,7 +9,7 @@ UB = [0, -80,    0.4, 0, 12, 12,  12,  12,    0];
 x_bound = [LB; UB];
 % y = sm_runSimulationFcn_parallel(x_opt);
 
-[x_opt, y_opt, X, Y] = surropt(@sm_runSimulationFcn_parallel, [], x_bound);
+[x_opt, y_opt, X, Y] = surropt(@(x) log(sm_runSimulationFcn_parallel(x)), [], x_bound);
 
 file_name = sprintf('surropt_result_%s.mat', datestr(now, 30));
 save(fullfile('results', file_name), 'X', 'y');
