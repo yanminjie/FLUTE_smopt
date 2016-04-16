@@ -1,4 +1,3 @@
 function my_startup()
 
-addpath(genpath('D:\UsefulMatlabTools\from me\'));
-addpath(genpath('D:\SimulationCodes\MatlabSubRoutines\'));
+addpath(genpath('C:\workspace\KIT\astra_sim\SupportingTools'));
