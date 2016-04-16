@@ -20,12 +20,17 @@ appearances = [1,1,1,2,2,1,2,3,1];
 output_para = {'RMSBunchLength'};
 THz_source = 'CSR';
 
-w=getCurrentWorker;
-if isempty(w)
+try
+    w=getCurrentWorker;
+    if isempty(w)
+        tempName = 'client';
+    else
+        tempName = num2str(w.ProcessId);
+    end
+catch
     tempName = 'client';
-else
-    tempName = num2str(w.ProcessId);
 end
+
 newFolder = ['myfolder',tempName];
 TempFolder = fullfile(tempdir,newFolder);
 TempFolder = [TempFolder,'\'];

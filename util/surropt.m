@@ -19,9 +19,7 @@ b_opt_shrink = true; % Only allow surrogate model to give an optimal inside a bo
 try 
     % Testing parallel toolbox
     fprintf('Testing parallel toolbox \n')
-    parfor i = 1:4
-        fprintf('Printing message %i \n', i)
-    end
+    w = getCurrentWorker();
     fprintf('Parallel toolbox is available.\n')
     b_parallel = true;
 catch ME
