@@ -1,4 +1,5 @@
 function master_test( )
+my_startup;
 addpath(genpath(cd));
 %MASTER_TEST Summary of this function goes here
 %   Detailed explanation goes here

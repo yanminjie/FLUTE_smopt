@@ -15,6 +15,20 @@ N_dim = size(x_bound,2);
 b_extreme = true; % Always deploy the next batch centred on the current overall optimum
 b_opt_shrink = true; % Only allow surrogate model to give an optimal inside a box, not the whole range
 
+% Test if parfor is avialable
+try 
+    % Testing parallel toolbox
+    fprintf('Testing parallel toolbox \n')
+    parfor i = 1:4
+        fprintf('Printing message %i \n', i)
+    end
+    fprintf('Parallel toolbox is available.\n')
+    b_parallel = true;
+catch ME
+    b_parallel = false;
+    fprintf('Parallel toolbox is unavailable with msg: %s .\n', ME.message)
+end
+
 %% Run the loop 
 X = []; y = [];
 x_opt = mean(x_bound);
@@ -43,7 +57,7 @@ while i_iter <= N_batch
     [X_new, x_bound_batch] = design_new_batch(x_opt, N, x_bound, shrink);
     
     % Deploy the experiment
-    [X_new, y_new] = deploy_experiment(fun, X_new); 
+    [X_new, y_new] = deploy_experiment(fun, X_new, b_parallel); 
     
     % Concatenate the data
     X = [X; X_new]; y = [y; y_new];
@@ -175,20 +189,32 @@ X = bsxfun(@plus, bsxfun(@times, X-0.5, width), x0);
 end
 
 % Deploy and clean up experiment result
-function [X, y] = deploy_experiment(fun, X)
+function [X, y] = deploy_experiment(fun, X, b_parallel)
+if nargin<3
+    b_parallel = false;
+end
 N_exp = size(X,1);
 y = nan(N_exp, 1);
-for i_exp = 1:N_exp
-    timer = tic();
-    y(i_exp) = feval(fun, X(i_exp, :));
-    fprintf('Experiment #%i/%i finished in %4.1f seconds \n', i_exp, N_exp, toc(timer));
+
+if b_parallel
+    parfor i_exp = 1:N_exp
+        timer = tic();
+        y(i_exp) = feval(fun, X(i_exp, :));
+        fprintf('Experiment #%i/%i finished in %4.1f seconds \n', i_exp, N_exp, toc(timer));
+    end
+else
+    for i_exp = 1:N_exp
+        timer = tic();
+        y(i_exp) = feval(fun, X(i_exp, :));
+        fprintf('Experiment #%i/%i finished in %4.1f seconds \n', i_exp, N_exp, toc(timer));
+    end
 end
 
 % idx_valid = ~isnan(y);
 % y = y(idx_valid); X = X(idx_valid, :);
 
 % penalise nan with large values
-y(isnan(y)) = log(1e-11);
+y(isnan(y)) = log(5e-12);
 end
 
 function [X_norm, X_mean, X_std] = normalise_data(X)
