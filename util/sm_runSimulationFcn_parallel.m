@@ -41,7 +41,7 @@ TempFolder = [TempFolder,'\'];
 % TempFolder = fullfile(tempdir,newFolder);
 % TempFolder = [TempFolder,'\'];
 mkdir(tempDir,newFolder);
-disp(TempFolder)
+% disp(TempFolder)
 
 astra_file_modified = [TempFolder,projectName,'.in'];
 out_dist_file = [TempFolder, projectName,'.1475.001'];

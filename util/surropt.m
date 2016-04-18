@@ -1,10 +1,15 @@
-function [x_opt, y_opt, X, Y] = surropt(fun, x0, x_bound)
+function [x_opt, y_opt, X, Y] = surropt(fun, x0, x_bound, transform)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
 %% Test mode
 if nargin == 0
     [fun, x0, x_bound] = get_dummy_fun();
+end
+
+if nargin < 4
+        transform.fwd = @(x) x;
+    transform.inverse = @(x) x;
 end
 
 %% Some parameters
@@ -16,10 +21,13 @@ b_extreme = true; % Always deploy the next batch centred on the current overall 
 b_opt_shrink = true; % Only allow surrogate model to give an optimal inside a box, not the whole range
 
 % Test if parfor is avialable
-try 
+try
     % Testing parallel toolbox
     fprintf('Testing parallel toolbox \n')
-    w = getCurrentWorker();
+        w = getCurrentWorker();
+%     parfor i = 1:4
+%         fprintf('Parallel message #%i', i)
+%     end
     fprintf('Parallel toolbox is available.\n')
     b_parallel = true;
 catch ME
@@ -39,6 +47,15 @@ ha = axes(); hold on;
 set(ha, 'yscale', 'log');
 h_title = title(' ');
 
+figure(102); clf;
+N_col = 2; N_row = ceil(N_dim/N_col);
+for i_input = 1:N_dim
+    hx(i_input) = subplot(N_row, N_col, i_input); hold on
+    ylabel(sprintf('x%i', i_input));
+end
+
+
+
 % TODO: Add a title for displaying the optimum value
 
 % And log file?
@@ -55,7 +72,7 @@ while i_iter <= N_batch
     [X_new, x_bound_batch] = design_new_batch(x_opt, N, x_bound, shrink);
     
     % Deploy the experiment
-    [X_new, y_new] = deploy_experiment(fun, X_new, b_parallel); 
+    [X_new, y_new] = deploy_experiment(fun, X_new, b_parallel, transform); 
     
     % Concatenate the data
     X = [X; X_new]; y = [y; y_new];
@@ -103,8 +120,8 @@ while i_iter <= N_batch
     y_opt = feval(fun, x_opt);
     y_pred = model_gp.predictFun(x_opt_norm)*y_std + y_mean;
     y_std = model_gp.stdFun(x_opt_norm)*y_std;  
-    fprintf('Prediction is  : %10.3e with 2std: %10.3e \n', exp(y_pred), exp(2*y_std))
-    fprintf('Actual value is: %10.3e \n', exp(y_opt));
+    fprintf('Prediction is  : %10.3e with 2std: %10.3e \n', transform.inverse(y_pred), transform.inverse(2*y_std))
+    fprintf('Actual value is: %10.3e \n', transform.inverse(y_opt));
 %     fprintf(['Solution is ', repmat('%10.3e', 1, length(x_opt)), '\n'], x_opt)
     
     % Only add to result if there is no nan
@@ -112,26 +129,7 @@ while i_iter <= N_batch
         X = [X; x_opt]; y = [y; y_opt];
     end
     
-    % Update convergence plots
-    % add model prediciton and std
-    plot(ha, i_iter, exp(y_pred), 'bx')
-    plot(ha, [i_iter, i_iter], exp([y_pred-2*y_std, y_pred+2*y_std]), 'b--')
-    
-    % add real value at model predicted x
-    plot(ha, i_iter, exp(y_opt), 'rx');
-    
-    % add the rest of the batch value
-    plot(ha, i_iter*ones(size(y_new)), exp(y_new), 'k+')
-    
-    % add historic minimum
-    plot(ha, i_iter, exp(min(y)), 'ro');
-    
-    % update title display
-    set(h_title, 'string', sprintf('Current best: %.4e', exp(min(y))));
-    
-    drawnow();
-        
-    % Decide where to deploy experiment next    
+     % Decide where to deploy experiment next    
     if b_extreme
         % Or, more extreme, the next batch is always based on the best
         % historical point
@@ -146,7 +144,31 @@ while i_iter <= N_batch
             x_opt = X_new(idx,:);
         end 
     end
-        
+    
+    % Update convergence plots
+    % add model prediciton and std
+    plot(ha, i_iter, transform.inverse(y_pred), 'bx')
+    plot(ha, [i_iter, i_iter], transform.inverse([y_pred-2*y_std, y_pred+2*y_std]), 'b--')
+    
+    % add real value at model predicted x
+    plot(ha, i_iter, transform.inverse(y_opt), 'rx');
+    
+    % add the rest of the batch value
+    plot(ha, i_iter*ones(size(y_new)), transform.inverse(y_new), 'k+')
+    
+    % add historic minimum
+    plot(ha, i_iter, transform.inverse(min(y)), 'ro');
+    
+    % update title display
+    set(h_title, 'string', sprintf('Current best: %.4e', transform.inverse(min(y))));
+    
+    % Update the inputs
+    for i_input = 1:N_dim
+        plot(hx(i_input), i_iter, x_opt(i_input), 'bx');
+    end
+    
+    drawnow();
+            
     fprintf('Finished %2ith batch \n \n', i_iter)   
     i_iter = i_iter+1;  
 end
@@ -163,14 +185,12 @@ x_opt = 1:N_dim;
 x_bound = repmat([-1; 1], 1, N_dim)*scale;
 x0 = rand(1,N_dim)*scale;
 
-fun = @(x) log(sum((x-x_opt).^2)+1);
-
-
+fun = @(x) sum((x-x_opt).^2)+1;
 end
 
 
 function [X, x_bound_batch]= design_new_batch(x0, N, x_bound, shrink)
-width = diff(x_bound)*shrink;
+width = diff(x_bound)*shrink;expexp
 % if x0 is too close to the bound, move it away
 x0 = max([x_bound(1,:) + width/2; x0]);
 x0 = min([x_bound(2,:) - width/2; x0]);
@@ -186,7 +206,7 @@ X = bsxfun(@plus, bsxfun(@times, X-0.5, width), x0);
 end
 
 % Deploy and clean up experiment result
-function [X, y] = deploy_experiment(fun, X, b_parallel)
+function [X, y] = deploy_experiment(fun, X, b_parallel, transform)
 if nargin<3
     b_parallel = false;
 end
@@ -211,7 +231,9 @@ end
 % y = y(idx_valid); X = X(idx_valid, :);
 
 % penalise nan with large values
-y(isnan(y)) = log(5e-12);
+y(isnan(y)) = 1e-11;
+
+y = transform.fwd(y);
 end
 
 function [X_norm, X_mean, X_std] = normalise_data(X)
