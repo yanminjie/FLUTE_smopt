@@ -53,8 +53,6 @@ supportFiles{3}=[AstraFilesFolder,'CTF3_Ez_ASTRA.dat'];
 supportFiles{4}=[AstraFilesFolder,'TWS_PSI_Sband_ASTRA.dat'];
 copy_supportFiles_for_parallel(TempFolder, supportFiles);
 
-% fitness = run_and_get_beam_para(astra_file_original, astra_file_modified, params, x, appearances,out_dist_file, out_LandF_file, output_para);
-
 idx = strcmp(output_para,'THzPeak');
 if all(idx) % contains and only contain THzPeak
     output_para_temp = {'RMSBunchLength'};

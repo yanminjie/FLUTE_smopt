@@ -3,3 +3,4 @@
 my_startup.m
 history_OutputInput.txt
 history_DistFileNameList.txt
+*.mat
